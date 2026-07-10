@@ -1,7 +1,21 @@
 """
-Marrow -- Database Models
+Marrow — Database Models (Persistence Layer)
 
-Raw sqlite3 — no ORM. Two tables: scans and recommendations.
+Raw sqlite3 with no ORM overhead — optimized for the lightweight,
+single-process architecture of the hackathon deployment.
+
+Schema:
+    scans            – One row per correlation run. Stores aggregate
+                       metrics (cost, risk) and the executive summary.
+    recommendations  – One row per resource-level action generated
+                       by the LLM reasoner (or deterministic fallback).
+                       Linked to scans via foreign key.
+
+Workflow:
+    Phase 1 (Correlator)  → save_scan()              → creates scan row
+    Phase 2 (Reasoner)    → save_recommendations()   → populates actions
+    Phase 2 (Reasoner)    → update_scan_summary()     → attaches executive summary
+    Dashboard             → get_latest_scan() + get_recommendations()
 """
 
 import sqlite3
@@ -19,7 +33,11 @@ def _get_db_path() -> str:
 
 
 def get_connection() -> sqlite3.Connection:
-    """Open a connection with row_factory set for dict-like access."""
+    """Open a connection with row_factory set for dict-like access.
+
+    Uses sqlite3.Row so that columns can be accessed by name,
+    and enables foreign key enforcement for referential integrity.
+    """
     conn = sqlite3.connect(_get_db_path(), timeout=10.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
@@ -64,8 +82,12 @@ def init_db() -> None:
 def save_scan(correlated_data: list[dict]) -> int:
     """Insert a scan row from correlated resource data. Returns scan_id.
 
-    Recommendations are NOT inserted here — Phase 3 (LLM Reasoner) will
-    populate them after the scan is created.
+    This is the first write in the two-phase pipeline:
+      1. save_scan()            → aggregate metrics (this function)
+      2. save_recommendations() → per-resource LLM actions (called later)
+
+    The separation allows the correlator to persist results immediately,
+    even if the LLM reasoner times out or falls back to deterministic mode.
     """
     resource_count = len(correlated_data)
     total_monthly_cost = sum(r["monthly_cost_usd"] for r in correlated_data)
