@@ -1,7 +1,9 @@
 """
-Marrow -- Application Entry Point
+Marrow — Application Entry Point
 
-Starts the Flask development server.
+Bootstraps the Flask application and serves as the primary entry point
+for both local development and production WSGI servers (e.g., Gunicorn).
+Initializes the database, CSRF protection, and registers the main blueprint.
 """
 
 from flask import Flask
