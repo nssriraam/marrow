@@ -1,8 +1,20 @@
 """
-Marrow -- PDF Report Generator
+Marrow — PDF Report Generator (Stakeholder Handoff)
 
-Generates a PDF report for a given scan using ReportLab.
-Includes text wrapping for justifications to avoid overflow.
+Generates polished, enterprise-ready PDF reports from scan results
+using ReportLab. Designed for one-click export from the dashboard
+so FinOps/SecOps teams can share findings with leadership without
+requiring access to the live platform.
+
+Report contents:
+    - Executive summary (LLM-generated or deterministic)
+    - Resource-level action table with justifications
+    - Projected monthly and annual savings
+    - Risk reduction metrics
+    - Confidence scores per recommendation
+
+Text wrapping is handled via ReportLab Paragraph objects to
+prevent overflow on long justification strings.
 """
 
 import io
