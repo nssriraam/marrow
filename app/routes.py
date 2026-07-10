@@ -1,8 +1,16 @@
 """
-Marrow -- Flask Routes
+Marrow — Flask Routes (API & Dashboard Layer)
 
-Blueprint with all web endpoints.
-Phase 2: functional wiring only, no styling (Phase 4).
+Blueprint exposing all web endpoints for the Marrow platform.
+
+Endpoints:
+    GET  /                     – Main dashboard with latest scan results
+    GET  /health               – Healthcheck for uptime monitoring
+    GET  /history              – Historical scan listing
+    POST /scan                 – Trigger a new correlation + reasoning run
+    GET  /api/recommendations  – JSON API for programmatic access
+    GET  /report/<scan_id>     – Download PDF report for a specific scan
+    GET  /report/latest        – Download PDF report for the most recent scan
 """
 import json
 import logging
@@ -16,10 +24,16 @@ bp = Blueprint("main", __name__)
 
 @bp.route("/health")
 def health():
+    """Healthcheck endpoint for Render uptime monitoring and load balancer probes."""
     return {"status": "ok"}
 
 @bp.route("/")
 def dashboard():
+    """Render the main command center dashboard.
+
+    Loads the latest scan, its recommendations, and re-correlates
+    the raw data to compute live attack-vector metrics for display.
+    """
     with models.get_connection() as db:
         latest_scan = db.execute("SELECT * FROM scans ORDER BY timestamp DESC LIMIT 1").fetchone()
         
@@ -68,6 +82,12 @@ def history():
 
 @bp.route("/scan", methods=["POST"])
 def scan():
+    """Trigger the full Marrow pipeline: ingest → correlate → reason → persist.
+
+    This is the core action endpoint. It runs the complete three-phase
+    pipeline (correlator, LLM reasoner, persistence) and redirects
+    back to the dashboard with flash feedback.
+    """
     try:
         with open(Config.BILLING_DATA_PATH) as f:
             billing = json.load(f)
@@ -94,6 +114,11 @@ def scan():
 
 @bp.route("/api/recommendations")
 def api_recommendations():
+    """JSON API endpoint for programmatic access to the latest recommendations.
+
+    Returns the full recommendation set from the most recent scan,
+    suitable for integration with external dashboards or CI/CD pipelines.
+    """
     with models.get_connection() as db:
         latest_scan = db.execute("SELECT * FROM scans ORDER BY timestamp DESC LIMIT 1").fetchone()
         if not latest_scan:
@@ -109,6 +134,11 @@ def api_recommendations():
 @bp.route("/report/<int:scan_id>")
 @bp.route("/report/latest")
 def download_report(scan_id=None):
+    """Generate and serve a PDF report for stakeholder handoff.
+
+    Supports both specific scan IDs and a convenience '/report/latest'
+    shortcut for quick access to the most recent analysis.
+    """
     from app.report import generate_report
     try:
         buffer = generate_report(scan_id)
