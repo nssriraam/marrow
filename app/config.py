@@ -22,6 +22,11 @@ class Config:
     """Single source of truth for all configuration."""
 
     # ── Fireworks AI ──────────────────────────────────────────────────────
+    # Credentials and endpoint for the Fireworks inference API.
+    # When a valid key is present, the reasoner routes queries to
+    # DeepSeek V4 running on AMD Instinct MI300X accelerators.
+    # If the key is missing or placeholder, the system gracefully
+    # falls back to the deterministic rule-based reasoner.
     FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "")
     FIREWORKS_BASE_URL: str = os.getenv(
         "FIREWORKS_BASE_URL",
@@ -35,6 +40,8 @@ class Config:
 
 
     # ── Flask ─────────────────────────────────────────────────────────────
+    # Secret key for session signing and CSRF protection.
+    # Auto-generates a random key if none is provided in .env.
     FLASK_SECRET_KEY: str = os.getenv("FLASK_SECRET_KEY", os.urandom(24).hex())
     FLASK_DEBUG: bool = os.getenv("FLASK_DEBUG", "false").lower() == "true"
 
@@ -42,6 +49,9 @@ class Config:
     DB_PATH: str = os.getenv("DATABASE_URL", str(PROJECT_ROOT / "marrow.db"))
 
     # ── Data paths ────────────────────────────────────────────────────────
+    # Paths to the AWS Cost Explorer and Security Hub JSON exports.
+    # In production, these would point to live API responses;
+    # for the hackathon demo, they reference bundled sample data.
     BILLING_DATA_PATH: str = os.getenv(
         "BILLING_DATA_PATH",
         str(PROJECT_ROOT / "data" / "sample_billing.json"),
