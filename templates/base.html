@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Marrow{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Flash messages outside main container so skeleton doesn't destroy them -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="container" style="padding-bottom: 0;">
+            {% for msg in messages %}
+                <div class="flash"><i class="fa-solid fa-circle-check"></i> {{ msg | e }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="container main-container">
+        <nav>
+            <span class="brand"><i class="fa-solid fa-shield-halved"></i> Marrow</span>
+            <a href="/" {% if request.path == '/' %}class="active"{% endif %}>Dashboard</a>
+            <a href="/history" {% if request.path == '/history' %}class="active"{% endif %}>Scan History</a>
+        </nav>
+
+        <div id="main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Floating Status Pill (shown during scan) -->
+    <div class="scan-status-bar" id="scanStatusBar">
+        <div class="pulse-dot"></div>
+        <div class="status-text" id="scanStatus">Ingesting AWS Cost Explorer & Security Hub data...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const scanForm = document.querySelector('form[action="/scan"]');
+            if (scanForm) {
+                scanForm.addEventListener('submit', function() {
+                    // Build skeleton HTML including the nav
+                    const skeletonHTML = `
+                        <div class="shimmer skel-summary" style="height: 220px;"></div>
+                        
+                        <div style="display: grid; grid-template-columns: 35% 1fr; gap: 2rem; margin-top: 2rem;">
+                            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                                <div class="shimmer skel-chart" style="height: 280px; width: 100%;"></div>
+                                <div class="shimmer skel-chart" style="height: 280px; width: 100%;"></div>
+                            </div>
+                            <div>
+                                <div class="shimmer skel-heading"></div>
+                                <div class="shimmer skel-card"></div>
+                                <div class="shimmer skel-card"></div>
+                                <div class="shimmer skel-card"></div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Delay replacing the DOM by 50ms so the browser doesn't cancel the form submission
+                    setTimeout(() => {
+                        const container = document.getElementById('main-content');
+                        if (container) {
+                            container.innerHTML = skeletonHTML;
+                        }
+                    }, 50);
+
+                    // Show floating status bar
+                    const statusBar = document.getElementById('scanStatusBar');
+                    const statusText = document.getElementById('scanStatus');
+                    statusBar.classList.add('active');
+
+                    const steps = [
+                        'Ingesting AWS Cost Explorer & Security Hub data...',
+                        'Correlating infrastructure by resource_id...',
+                        'Computing risk scores across all resources...',
+                        'Transmitting batched payload to Fireworks AI...',
+                        'Model is reasoning over cost vs. risk metrics...',
+                        'Generating structured JSON recommendations...',
+                        'Building executive summary...',
+                        'Finalizing confidence scores...'
+                    ];
+                    let i = 0;
+                    setInterval(function() {
+                        i = (i + 1) % steps.length;
+                        statusText.style.opacity = 0;
+                        setTimeout(function() {
+                            statusText.textContent = steps[i];
+                            statusText.style.opacity = 1;
+                        }, 400);
+                    }, 4000);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+version: '3.8'
+name: marrow
+
+services:
+  web:
+    build: .
+    container_name: marrow
+    ports:
+      - "5005:5005"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite:////app/data/marrow.db
+    volumes:
+      - ./data:/app/data
+      - ./reports:/app/reports
+    restart: unless-stopped

@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+{% block title %}Marrow - Dashboard{% endblock %}
+
+{% block content %}
+{% if demo_mode %}
+<div style="background: rgba(255, 171, 0, 0.1); border: 1px solid rgba(255, 171, 0, 0.3); color: #ffab00; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; font-size: 0.95rem;">
+    <i class="fa-solid fa-triangle-exclamation"></i> <strong>Running in Demo Mode</strong> — recommendations use deterministic fallback logic to protect API credits. Clone the repo with your own Fireworks key for live AI reasoning.
+</div>
+{% endif %}
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <div>
+        <h1 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 2rem;">Command Center</h1>
+        {% if latest_scan %}
+            <p style="color: var(--text-secondary); margin-top: 0; margin-bottom: 0; font-size: 1rem; font-weight: 500;">
+                <i class="fa-regular fa-clock"></i> Last scan: #{{ latest_scan.id }} on {{ latest_scan.timestamp.split('.')[0].replace('T', ' ') }}
+            </p>
+        {% endif %}
+    </div>
+    <form action="/scan" method="POST" onsubmit="this.querySelector('button').disabled = true;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bolt"></i> Analyze Infrastructure</button>
+    </form>
+</div>
+
+{% if latest_scan and latest_scan.executive_summary %}
+<!-- Hero Block -->
+<div class="glass-card" style="margin-bottom: 2rem; padding: 2rem;">
+    <h3 style="margin-top: 0; color: #e1e4e8; display: flex; align-items: center; gap: 0.5rem; font-size: 1.4rem;"><i class="fa-solid fa-robot" style="color: #bc8cff;"></i> AI Executive Summary</h3>
+    <p style="color: #8b949e; line-height: 1.6; font-size: 1.1rem; margin-bottom: 2rem;">{{ latest_scan.executive_summary }}</p>
+    
+    <!-- Summary stats inside Hero Block -->
+    {% set total_cost = resources | sum(attribute='monthly_cost_usd') %}
+    {% set total_savings = recommendations | sum(attribute='monthly_savings_usd') if recommendations else 0 %}
+    {% set annual_savings = total_savings * 12 %}
+    {% set total_resources = resources | length %}
+    <div class="stat-row" style="margin-bottom: 0;">
+        <div class="stat-box" style="border-color: rgba(86, 211, 100, 0.4);">
+            <div class="label" style="color: #56d364;"><i class="fa-solid fa-piggy-bank"></i> Projected Savings / yr</div>
+            <div class="value" style="color: #56d364;">${{ "{:,.0f}".format(annual_savings) }}</div>
+        </div>
+        <div class="stat-box" style="border-color: rgba(88, 166, 255, 0.4);">
+            <div class="label" style="color: #58a6ff;"><i class="fa-solid fa-shield-halved"></i> Attack Vectors Neutralized</div>
+            <div class="value" style="color: #58a6ff;">{{ vectors_removed }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="label"><i class="fa-solid fa-server"></i> Resources Analyzed</div>
+            <div class="value" style="color: #e1e4e8;">{{ total_resources }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if recommendations %}
+<!-- Split View Layout -->
+<div class="zoom-overlay" id="zoomOverlay"></div>
+<div class="dashboard-split" style="display: grid; grid-template-columns: 35% minmax(0, 1fr); gap: 2rem;">
+    
+    <!-- Left Column: Charts -->
+    <div class="sidebar-charts" style="display: flex; flex-direction: column; gap: 2rem;">
+        <div class="glass-card chart-container" style="height: 280px; padding: 1.5rem; margin-bottom: 0;">
+            <canvas id="savingsChart"></canvas>
+        </div>
+        <div class="glass-card chart-container" style="height: 280px; padding: 1.5rem; margin-bottom: 0;">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Column: Recommendations -->
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; margin-top: -0.5rem;">
+            <h2 style="margin: 0;">AI Recommendations</h2>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div style="font-size: 0.85rem; color: #8b949e; background: rgba(237, 28, 36, 0.05); border: 1px solid rgba(237, 28, 36, 0.2); padding: 0.4rem 0.8rem; border-radius: 12px;">
+                    <i class="fa-solid fa-microchip" style="color: #ED1C24;"></i> Reasoning generated via AMD-hosted Fireworks AI
+                </div>
+                <a href="/report/latest" class="action-badge" style="text-decoration: none; background: rgba(88, 166, 255, 0.1); color: #58a6ff; border: 1px solid rgba(88, 166, 255, 0.3); font-weight: 500; cursor: pointer;">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                </a>
+            </div>
+        </div>
+        <div class="rec-grid">
+            {% for rec in recommendations %}
+            {% set res = resources | selectattr('resource_id', 'equalto', rec.resource_id) | first %}
+            <div class="rec-card">
+                <div class="rec-info">
+                    <div class="action-badge action-{{ rec.action }}">
+                        {% if rec.action == 'terminate' %}<i class="fa-solid fa-trash"></i> Terminate
+                        {% elif rec.action == 'rightsize' %}<i class="fa-solid fa-arrow-down"></i> Rightsize
+                        {% elif rec.action == 'patch' %}<i class="fa-solid fa-shield-check"></i> Patch
+                        {% elif rec.action == 'restrict-access' %}<i class="fa-solid fa-lock"></i> Restrict Access
+                        {% else %}<i class="fa-solid fa-check"></i> Ignore{% endif %}
+                    </div>
+                    {% if rec.confidence and rec.confidence < 70 %}
+                    <div class="action-badge badge-review">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Review Recommended ({{ rec.confidence }}% conf)
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div class="resource-id">{{ rec.resource_id | e }}</div>
+                        <div class="justification">{{ rec.justification | e }}</div>
+                        {% if res and res.findings %}
+                        <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            {% set compliance_refs = [] %}
+                            {% for f in res.findings %}
+                                {% if f.compliance_ref and f.compliance_ref not in compliance_refs %}
+                                    {% set _ = compliance_refs.append(f.compliance_ref) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for ref in compliance_refs %}
+                                <span style="font-size: 0.75rem; background: rgba(88, 166, 255, 0.1); color: #58a6ff; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(88, 166, 255, 0.2);">
+                                    <i class="fa-solid fa-file-contract"></i> {{ ref }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="rec-impact">
+                    {% if rec.monthly_savings_usd > 0 %}
+                    <div class="impact-item">
+                        <span class="impact-label">Savings</span>
+                        <span class="impact-value savings">+${{ "%.0f" | format(rec.monthly_savings_usd) }}/mo</span>
+                    </div>
+                    {% endif %}
+                    {% if rec.risk_reduction and rec.risk_reduction != 'None' %}
+                    <div class="impact-item">
+                        <span class="impact-label">Security Impact</span>
+                        <span class="impact-value priority" style="color: #58a6ff;">{{ rec.risk_reduction }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="impact-item">
+                        <span class="impact-label">Priority</span>
+                        <span class="impact-value priority">{{ rec.priority_score }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Chart Initialization -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- SAVINGS CHART ---
+        const ctxSavings = document.getElementById('savingsChart').getContext('2d');
+        
+        // Prepare data: only resources with > 0 savings or high cost
+        const rawData = [
+            {% for r in resources %}
+            {
+                id: {{ r.resource_id | tojson }},
+                cost: {{ r.monthly_cost_usd }},
+                savings: {% for rec in recommendations %}{% if rec.resource_id == r.resource_id %}{{ rec.monthly_savings_usd }}{% endif %}{% else %}0{% endfor %}
+            },
+            {% endfor %}
+        ].filter(d => d.cost > 0).sort((a, b) => b.cost - a.cost);
+        
+        const labels = rawData.map(d => d.id.substring(0, 12) + "...");
+        const costs = rawData.map(d => d.cost - (d.savings || 0)); 
+        const savings = rawData.map(d => d.savings || 0);
+        
+        new Chart(ctxSavings, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Projected Savings',
+                        data: savings,
+                        backgroundColor: 'rgba(86, 211, 100, 0.8)',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Remaining Cost',
+                        data: costs,
+                        backgroundColor: 'rgba(88, 166, 255, 0.3)',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#8b949e', font: { family: 'Inter' } } },
+                    title: {
+                        display: true,
+                        text: 'Spend vs. AI Optimized Spend',
+                        color: '#e1e4e8',
+                        font: { size: 14, family: 'Inter', weight: '600' }
+                    }
+                },
+                scales: {
+                    x: { stacked: true, ticks: { color: '#8b949e', maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(48, 54, 61, 0.3)' } },
+                    y: { stacked: true, beginAtZero: true, ticks: { color: '#8b949e', callback: function(value) { return '$' + value; } }, grid: { color: 'rgba(48, 54, 61, 0.3)' } }
+                }
+            }
+        });
+
+        // --- TREND CHART ---
+        const ctxTrend = document.getElementById('trendChart').getContext('2d');
+        
+        const historyLabels = [
+            {% for s in history %}
+            "Scan #{{ s.id }}",
+            {% endfor %}
+        ];
+        
+        const historyRisk = [
+            {% for s in history %}
+            {{ s.total_risk_score }},
+            {% endfor %}
+        ];
+
+        new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: historyLabels,
+                datasets: [{
+                    label: 'Total Risk Score',
+                    data: historyRisk,
+                    borderColor: '#f85149',
+                    backgroundColor: 'rgba(248, 81, 73, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#f85149',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#8b949e', font: { family: 'Inter' } } },
+                    title: {
+                        display: true,
+                        text: 'Attack Surface Trend Over Time',
+                        color: '#e1e4e8',
+                        font: { size: 14, family: 'Inter', weight: '600' }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#8b949e' }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: '#8b949e' }, grid: { color: 'rgba(48, 54, 61, 0.3)' } }
+                }
+            }
+        });
+        // --- ZOOM LOGIC ---
+        const overlay = document.getElementById('zoomOverlay');
+        const chartContainers = document.querySelectorAll('.chart-container');
+        
+        let currentlyZoomed = null;
+
+        function closeZoom() {
+            if (currentlyZoomed) {
+                currentlyZoomed.classList.remove('zoomed');
+                overlay.classList.remove('active');
+                let target = currentlyZoomed;
+                setTimeout(() => {
+                    target.setAttribute('style', target.dataset.originalStyle || '');
+                    document.querySelectorAll('.chart-placeholder').forEach(el => el.remove());
+                }, 300);
+                currentlyZoomed = null;
+            }
+        }
+
+        chartContainers.forEach(container => {
+            container.addEventListener('click', function(e) {
+                if (currentlyZoomed === this) {
+                    closeZoom();
+                } else {
+                    if (currentlyZoomed) closeZoom();
+                    
+                    // Save the original inline styles (e.g., height: 280px) before overriding
+                    this.dataset.originalStyle = this.getAttribute('style') || '';
+                    
+                    // Create placeholder to prevent layout collapse
+                    let placeholder = document.createElement('div');
+                    placeholder.className = 'chart-placeholder';
+                    placeholder.style.width = this.offsetWidth + 'px';
+                    placeholder.style.height = this.offsetHeight + 'px';
+                    placeholder.style.marginBottom = window.getComputedStyle(this).marginBottom;
+                    this.parentNode.insertBefore(placeholder, this.nextSibling);
+
+                    // Set initial fixed position exactly where it is
+                    let rect = this.getBoundingClientRect();
+                    this.style.position = 'fixed';
+                    this.style.top = rect.top + 'px';
+                    this.style.left = rect.left + 'px';
+                    this.style.width = rect.width + 'px';
+                    this.style.height = rect.height + 'px';
+                    this.style.margin = '0';
+                    this.style.zIndex = '1000';
+
+                    // Force reflow
+                    void this.offsetHeight;
+
+                    this.classList.add('zoomed');
+                    overlay.classList.add('active');
+                    currentlyZoomed = this;
+                }
+            });
+        });
+
+        overlay.addEventListener('click', closeZoom);
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeZoom();
+        });
+    });
+</script>
+{% else %}
+    <div style="text-align: center; padding: 4rem 2rem; background: var(--bg-card); border-radius: 12px; border: 1px dashed var(--border-color);">
+        <i class="fa-solid fa-robot" style="font-size: 3rem; color: #58a6ff; margin-bottom: 1rem; opacity: 0.5;"></i>
+        <h2 style="justify-content: center;">No AI Recommendations Yet</h2>
+        <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto;">
+            Run an infrastructure scan to let Marrow analyze your cloud environment for cost and security optimization opportunities.
+        </p>
+    </div>
+{% endif %}
+{% endblock %}

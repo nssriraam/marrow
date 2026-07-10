@@ -1,0 +1,254 @@
+[
+  {
+    "resource_id": "rds-94016abc0",
+    "finding_type": "OUTDATED_AMI",
+    "severity": "MEDIUM",
+    "description": "AMI is significantly out of date (Generated)",
+    "compliance_ref": "CIS 5.2"
+  },
+  {
+    "resource_id": "rds-16324abc2",
+    "finding_type": "OVERPERMISSIVE_ROLE",
+    "severity": "MEDIUM",
+    "description": "IAM role has wildcard permissions (Generated)",
+    "compliance_ref": "CIS 2.3"
+  },
+  {
+    "resource_id": "rds-64245abc3",
+    "finding_type": "OVERPERMISSIVE_ROLE",
+    "severity": "MEDIUM",
+    "description": "IAM role has wildcard permissions (Generated)",
+    "compliance_ref": "CIS 5.1"
+  },
+  {
+    "resource_id": "rds-64245abc3",
+    "finding_type": "OVERPERMISSIVE_ROLE",
+    "severity": "MEDIUM",
+    "description": "IAM role has wildcard permissions (Generated)",
+    "compliance_ref": "CIS 3.4"
+  },
+  {
+    "resource_id": "rds-64245abc3",
+    "finding_type": "MISSING_MFA",
+    "severity": "HIGH",
+    "description": "IAM role missing MFA requirement (Generated)",
+    "compliance_ref": "CIS 5.1"
+  },
+  {
+    "resource_id": "rds-64245abc3",
+    "finding_type": "PUBLIC_ACCESS",
+    "severity": "CRITICAL",
+    "description": "Resource is exposed directly to the public internet (Generated)",
+    "compliance_ref": "CIS 2.2"
+  },
+  {
+    "resource_id": "s3-98700abc4",
+    "finding_type": "OUTDATED_AMI",
+    "severity": "MEDIUM",
+    "description": "AMI is significantly out of date (Generated)",
+    "compliance_ref": "CIS 5.2"
+  },
+  {
+    "resource_id": "dynamodb-18413abc5",
+    "finding_type": "WEAK_CIPHERS",
+    "severity": "LOW",
+    "description": "Using deprecated TLS versions (Generated)",
+    "compliance_ref": "CIS 3.4"
+  },
+  {
+    "resource_id": "rds-71275abc6",
+    "finding_type": "UNENCRYPTED_VOLUME",
+    "severity": "CRITICAL",
+    "description": "Data volume is not encrypted at rest (Generated)",
+    "compliance_ref": "CIS 3.2"
+  },
+  {
+    "resource_id": "rds-71275abc6",
+    "finding_type": "OPEN_SECURITY_GROUP",
+    "severity": "HIGH",
+    "description": "Security group allows broad inbound access (Generated)",
+    "compliance_ref": "CIS 2.3"
+  },
+  {
+    "resource_id": "ebs-84601abc8",
+    "finding_type": "MISSING_MFA",
+    "severity": "HIGH",
+    "description": "IAM role missing MFA requirement (Generated)",
+    "compliance_ref": "CIS 3.5"
+  },
+  {
+    "resource_id": "ebs-84601abc8",
+    "finding_type": "PUBLIC_ACCESS",
+    "severity": "CRITICAL",
+    "description": "Resource is exposed directly to the public internet (Generated)",
+    "compliance_ref": "CIS 2.3"
+  },
+  {
+    "resource_id": "ebs-18542abc11",
+    "finding_type": "PUBLIC_ACCESS",
+    "severity": "CRITICAL",
+    "description": "Resource is exposed directly to the public internet (Generated)",
+    "compliance_ref": "CIS 3.4"
+  },
+  {
+    "resource_id": "ebs-18542abc11",
+    "finding_type": "UNENCRYPTED_VOLUME",
+    "severity": "CRITICAL",
+    "description": "Data volume is not encrypted at rest (Generated)",
+    "compliance_ref": "CIS 3.1"
+  },
+  {
+    "resource_id": "ebs-18542abc11",
+    "finding_type": "WEAK_CIPHERS",
+    "severity": "LOW",
+    "description": "Using deprecated TLS versions (Generated)",
+    "compliance_ref": "CIS 1.2"
+  },
+  {
+    "resource_id": "ebs-18542abc11",
+    "finding_type": "OVERPERMISSIVE_ROLE",
+    "severity": "MEDIUM",
+    "description": "IAM role has wildcard permissions (Generated)",
+    "compliance_ref": "CIS 5.1"
+  },
+  {
+    "resource_id": "eks-27731abc12",
+    "finding_type": "OVERPERMISSIVE_ROLE",
+    "severity": "MEDIUM",
+    "description": "IAM role has wildcard permissions (Generated)",
+    "compliance_ref": "CIS 3.4"
+  },
+  {
+    "resource_id": "lambda-81003abc13",
+    "finding_type": "WEAK_CIPHERS",
+    "severity": "LOW",
+    "description": "Using deprecated TLS versions (Generated)",
+    "compliance_ref": "CIS 3.1"
+  },
+  {
+    "resource_id": "eks-58066abc14",
+    "finding_type": "MISSING_MFA",
+    "severity": "HIGH",
+    "description": "IAM role missing MFA requirement (Generated)",
+    "compliance_ref": "CIS 3.3"
+  },
+  {
+    "resource_id": "ec2-12349abc15",
+    "finding_type": "WEAK_CIPHERS",
+    "severity": "LOW",
+    "description": "Using deprecated TLS versions (Generated)",
+    "compliance_ref": "CIS 1.3"
+  },
+  {
+    "resource_id": "eks-37820abc17",
+    "finding_type": "WEAK_CIPHERS",
+    "severity": "LOW",
+    "description": "Using deprecated TLS versions (Generated)",
+    "compliance_ref": "CIS 1.5"
+  },
+  {
+    "resource_id": "ec2-87593abc18",
+    "finding_type": "OVERPERMISSIVE_ROLE",
+    "severity": "MEDIUM",
+    "description": "IAM role has wildcard permissions (Generated)",
+    "compliance_ref": "CIS 2.1"
+  },
+  {
+    "resource_id": "ec2-87593abc18",
+    "finding_type": "OUTDATED_AMI",
+    "severity": "MEDIUM",
+    "description": "AMI is significantly out of date (Generated)",
+    "compliance_ref": "CIS 4.3"
+  },
+  {
+    "resource_id": "dynamodb-86170abc19",
+    "finding_type": "MISSING_MFA",
+    "severity": "HIGH",
+    "description": "IAM role missing MFA requirement (Generated)",
+    "compliance_ref": "CIS 2.5"
+  },
+  {
+    "resource_id": "dynamodb-86170abc19",
+    "finding_type": "UNENCRYPTED_VOLUME",
+    "severity": "CRITICAL",
+    "description": "Data volume is not encrypted at rest (Generated)",
+    "compliance_ref": "CIS 5.4"
+  },
+  {
+    "resource_id": "dynamodb-86170abc19",
+    "finding_type": "UNENCRYPTED_VOLUME",
+    "severity": "CRITICAL",
+    "description": "Data volume is not encrypted at rest (Generated)",
+    "compliance_ref": "CIS 3.3"
+  },
+  {
+    "resource_id": "dynamodb-86170abc19",
+    "finding_type": "OPEN_SECURITY_GROUP",
+    "severity": "HIGH",
+    "description": "Security group allows broad inbound access (Generated)",
+    "compliance_ref": "CIS 4.5"
+  },
+  {
+    "resource_id": "s3-70723abc22",
+    "finding_type": "MISSING_MFA",
+    "severity": "HIGH",
+    "description": "IAM role missing MFA requirement (Generated)",
+    "compliance_ref": "CIS 4.1"
+  },
+  {
+    "resource_id": "s3-70723abc22",
+    "finding_type": "WEAK_CIPHERS",
+    "severity": "LOW",
+    "description": "Using deprecated TLS versions (Generated)",
+    "compliance_ref": "CIS 3.1"
+  },
+  {
+    "resource_id": "s3-70723abc22",
+    "finding_type": "MISSING_MFA",
+    "severity": "HIGH",
+    "description": "IAM role missing MFA requirement (Generated)",
+    "compliance_ref": "CIS 5.4"
+  },
+  {
+    "resource_id": "s3-70723abc22",
+    "finding_type": "PUBLIC_ACCESS",
+    "severity": "CRITICAL",
+    "description": "Resource is exposed directly to the public internet (Generated)",
+    "compliance_ref": "CIS 1.4"
+  },
+  {
+    "resource_id": "eks-48607abc24",
+    "finding_type": "OUTDATED_AMI",
+    "severity": "MEDIUM",
+    "description": "AMI is significantly out of date (Generated)",
+    "compliance_ref": "CIS 2.2"
+  },
+  {
+    "resource_id": "eks-48607abc24",
+    "finding_type": "MISSING_MFA",
+    "severity": "HIGH",
+    "description": "IAM role missing MFA requirement (Generated)",
+    "compliance_ref": "CIS 1.2"
+  },
+  {
+    "resource_id": "eks-48607abc24",
+    "finding_type": "OUTDATED_AMI",
+    "severity": "MEDIUM",
+    "description": "AMI is significantly out of date (Generated)",
+    "compliance_ref": "CIS 4.1"
+  },
+  {
+    "resource_id": "eks-48607abc24",
+    "finding_type": "OVERPERMISSIVE_ROLE",
+    "severity": "MEDIUM",
+    "description": "IAM role has wildcard permissions (Generated)",
+    "compliance_ref": "CIS 3.1"
+  },
+  {
+    "resource_id": "rds-94016abc0",
+    "finding_type": "PUBLIC_ACCESS",
+    "severity": "CRITICAL",
+    "description": "Sandbox database is public",
+    "compliance_ref": "CIS 2.2.2"
+  }
+]
