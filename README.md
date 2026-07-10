@@ -8,7 +8,7 @@ Built in 5 days for **AMD Developer Hackathon ACT II** · Track 3: Unicorn 🦄
 
 [![AMD](https://img.shields.io/badge/Powered_by-AMD_%2B_Fireworks-ED1C24?style=flat-square&labelColor=1e293b&logo=amd&logoColor=white)](#amd--fireworks-in-action)
 [![Demo Video](https://img.shields.io/badge/Watch-Demo_Video-FF0000?style=flat-square&labelColor=1e293b&logo=youtube&logoColor=white)](https://youtu.be/VW1X_at-EG8)
-[![Live Demo](https://img.shields.io/badge/Try-Live_Demo-8B5CF6?style=flat-square&labelColor=1e293b&logo=googlechrome&logoColor=white)](YOUR_DEMO_URL_HERE)
+[![Live Demo](https://img.shields.io/badge/Try-Live_Demo-8B5CF6?style=flat-square&labelColor=1e293b&logo=googlechrome&logoColor=white)](https://marrow-qhu0.onrender.com)
 [![Docker](https://img.shields.io/badge/Deploy-Docker_Ready-2496ED?style=flat-square&labelColor=1e293b&logo=docker&logoColor=white)](#installation)
 [![License](https://img.shields.io/badge/License-MIT-4B5563?style=flat-square&labelColor=1e293b)](#license)
 
