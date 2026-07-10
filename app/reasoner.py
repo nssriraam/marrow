@@ -1,8 +1,22 @@
 """
-Marrow -- LLM Reasoner
+Marrow — LLM Reasoner (Decision Engine)
 
-Connects to Fireworks AI (AMD-hosted models) to generate recommendations.
-Includes a mock fallback mode if the API key is missing so development can continue.
+The core intelligence layer of Marrow. Operates in two modes:
+
+  1. LIVE MODE  — When a valid Fireworks API key is present, queries are
+                  routed to DeepSeek V4 running on AMD Instinct MI300X
+                  accelerators via the Fireworks inference API. Returns
+                  nuanced, context-aware recommendations with chain-of-
+                  thought justifications.
+
+  2. DEMO MODE — When no API key is configured (e.g., public internet
+                 traffic hitting the live demo), the system falls back
+                 to a fully deterministic rule-based reasoner. This
+                 protects API credits while still producing realistic,
+                 consistent output for evaluation.
+
+Both modes output the same JSON schema so the dashboard and PDF
+export layer work identically regardless of which mode is active.
 """
 
 import json
